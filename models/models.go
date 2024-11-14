@@ -2,6 +2,7 @@ package models
 
 import "time"
 
+// PodInsightsRequest represents the request for the pod insights
 type PodInsightsRequest struct {
 	PodName       string    `json:"podName"`
 	Namespace     string    `json:"namespace"`
@@ -15,6 +16,7 @@ type PodInsightsRequest struct {
 	UpdatedAt     time.Time `json:"updatedAt"`
 }
 
+// PodInsightsResponse represents the response for the pod insights
 type PodInsightsResponse struct {
 	PodName        string `json:"podName"`
 	Namespace      string `json:"namespace"`
