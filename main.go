@@ -10,17 +10,23 @@ import (
 	"time"
 
 	"github.com/balajiss36/k8s-insights/db"
+	"github.com/balajiss36/k8s-insights/misc"
 	"github.com/balajiss36/k8s-insights/routes"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
+	config, err := misc.LoadConfig(".")
+	if err != nil {
+		log.Fatalf("Failed to load config: %v\n", err)
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	router := gin.Default()
 
-	client, err := db.SetupMongoDB(ctx)
+	client, err := db.SetupMongoDB(ctx, config)
 	if err != nil {
 		log.Fatalf("Failed to connect to MongoDB: %v\n", err)
 	}
@@ -32,7 +38,7 @@ func main() {
 	handlers.RegisterRoutes(router)
 
 	srv := &http.Server{
-		Addr:    ":8080",
+		Addr:    config.HTTPAddress,
 		Handler: router,
 	}
 

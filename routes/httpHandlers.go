@@ -2,6 +2,8 @@ package routes
 
 import (
 	"context"
+	"encoding/json"
+	"io"
 	"net/http"
 
 	"github.com/balajiss36/k8s-insights/errors"
@@ -25,7 +27,7 @@ func NewHandler(ctx context.Context, clientDB *mongo.Client) *handler {
 }
 
 func (h *handler) RegisterRoutes(r *gin.Engine) {
-	group := r.Group("/api")
+	group := r.Group("/api/v1")
 
 	group.GET("/test", h.Test)
 	group.GET("/pod-insights", h.GetPodInsights)
@@ -60,4 +62,24 @@ func (h *handler) GetPodInsights(c *gin.Context) {
 }
 
 func (h *handler) PostPodInsights(c *gin.Context) {
+	var podInsights models.PodInsightsRequest
+
+	jsonData, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		errors.NewError(c, err, http.StatusBadRequest, "unable to read pod insights")
+	}
+
+	err = json.Unmarshal(jsonData, &podInsights)
+	if err != nil {
+		errors.NewError(c, err, http.StatusBadRequest, "unable to decode pod insights")
+	}
+
+	db := h.client.Database("k8s-insights")
+	_, err = db.Collection("pod-insights").InsertOne(c, podInsights)
+	if err != nil {
+		errors.NewError(c, err, http.StatusInternalServerError, "unable to insert pod insights")
+	}
+	c.JSON(http.StatusAccepted, gin.H{
+		"message": "pod data inserted successfully",
+	})
 }
