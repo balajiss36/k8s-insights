@@ -4,15 +4,15 @@ import "time"
 
 // PodInsightsRequest represents the request for the pod insights
 type PodInsightsRequest struct {
-	PodName       string    `json:"pod" bson:"pod"`
-	Namespace     string    `json:"namespace" bson:"namespace"`
-	CPURequest    string    `json:"cpuRequest" bson:"cpuRequest"`
-	MemoryRequest string    `json:"memoryRequest" bson:"memoryRequest"`
-	CPULimit      string    `json:"cpuLimit" bson:"cpuLimit"`
-	MemoryLimit   string    `json:"memoryLimit" bson:"memoryLimit"`
-	CPUUsage      string    `json:"cpuUsage" bson:"cpuUsage"`
-	MemoryUsage   string    `json:"memoryUsage" bson:"memoryUsage"`
-	RequestTime   time.Time `json:"requestTime" bson:"requestTime"`
+	PodName       string    `json:"pod" bson:"pod,omitempty"`
+	Namespace     string    `json:"namespace" bson:"namespace,omitempty"`
+	CPURequest    int64     `json:"cpu_request" bson:"cpu_request,omitempty"`
+	MemoryRequest int64     `json:"memory_request" bson:"memory_request,omitempty"`
+	CPULimit      int64     `json:"cpu_limit" bson:"cpu_limit,omitempty"`
+	MemoryLimit   int64     `json:"memory_limit" bson:"memory_limit,omitempty"`
+	CPUUsage      int64     `json:"cpu_usage" bson:"cpu_usage,omitempty"`
+	MemoryUsage   int64     `json:"memory_usage" bson:"memory_usage,omitempty"`
+	RequestTime   time.Time `json:"request_time" bson:"request_time,omitempty"`
 }
 
 // PodInsightsResponse represents the response for the pod insights
