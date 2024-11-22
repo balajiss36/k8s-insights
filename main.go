@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/balajiss36/k8s-insights/db"
 	"github.com/balajiss36/k8s-insights/misc"
@@ -21,8 +20,7 @@ func main() {
 		log.Fatalf("Failed to load config: %v\n", err)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+	ctx := context.Background()
 
 	router := gin.Default()
 

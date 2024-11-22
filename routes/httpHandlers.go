@@ -73,13 +73,40 @@ func (h *handler) PostPodInsights(c *gin.Context) {
 	if err != nil {
 		errors.NewError(c, err, http.StatusBadRequest, "unable to decode pod insights")
 	}
+	collection := h.client.Database("k8s-insights").Collection("pod-insights")
+	found, err := h.CheckPodData(podInsights, collection)
+	if err != nil {
+		errors.NewError(c, err, http.StatusInternalServerError, "unable to update existing pod insights data")
+		return
+	}
+	if found {
+		c.JSON(http.StatusAccepted, gin.H{
+			"message": "existing pod data update successfully",
+		})
+		return
+	}
 
-	db := h.client.Database("k8s-insights")
-	_, err = db.Collection("pod-insights").InsertOne(c, podInsights)
+	_, err = collection.InsertOne(c, podInsights)
 	if err != nil {
 		errors.NewError(c, err, http.StatusInternalServerError, "unable to insert pod insights")
 	}
 	c.JSON(http.StatusAccepted, gin.H{
 		"message": "pod data inserted successfully",
 	})
+}
+
+func (h *handler) CheckPodData(podInsights models.PodInsightsRequest, collection *mongo.Collection) (bool, error) {
+	filter := bson.M{"pod": podInsights.PodName, "namespace": podInsights.Namespace}
+	count, err := collection.CountDocuments(h.context, filter)
+	if err != nil {
+		return false, err
+	}
+	if count > 0 {
+		mongoResult := collection.FindOneAndUpdate(h.context, filter, bson.M{"$set": podInsights})
+		if mongoResult.Err() != nil {
+			return false, mongoResult.Err()
+		}
+		return true, nil
+	}
+	return false, nil
 }
